@@ -1,3 +1,6 @@
 langchain-gigachat==0.3.12
 langgraph==0.6.7
 python-dotenv==1.1.0
+fastapi==0.118.0
+uvicorn==0.37.0
+langchain==0.3.27

@@ -2,9 +2,7 @@ from aiogram import Router, F, types
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-import json
-import aiohttp
-from misc.keyboards import main_kb, cancel_kb
+from misc.keyboards import main_kb
 from misc.functions import fetch_digital_maturity
 
 router = Router()
@@ -37,6 +35,7 @@ answer_options = {
     "yes": "Да",
     "mostly_yes": "Скорее Да",
     "mostly_no": "Скорее Нет",
+    "no": "Нет",
     "unknown": "Нет информации"
 }
 

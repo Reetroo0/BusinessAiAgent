@@ -4,6 +4,7 @@ main_kb = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(text="Анкета"),
+            KeyboardButton(text="Задать вопрос"),
         ],
     ],
     resize_keyboard=True

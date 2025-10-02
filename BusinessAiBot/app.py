@@ -1,6 +1,6 @@
 import asyncio
 from config import bot, dp ,logger
-from handlers import start, survey
+from handlers import start, survey, question
 #from misc.pgSQL import pgConnect
 from misc.keyboards import main_kb
 
@@ -9,6 +9,7 @@ async def main():
     # Подключение хендлеров
     dp.include_router(start.router)
     dp.include_router(survey.router)
+    dp.include_router(question.router)
 
     
     

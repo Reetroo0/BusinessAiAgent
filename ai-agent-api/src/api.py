@@ -65,6 +65,56 @@ async def digital_maturity(data: CompanyData = Body(...)):
     return {"result": result}
 
 
+class QuestionPayload(BaseModel):
+    question: str
+
+
+@app.get("/askQuestion")
+@app.post("/askQuestion")
+async def ask(request: Request, payload: QuestionPayload = Body(...)):
+    """Accepts JSON body with {'question': '...'} and returns agent answer as JSON.
+
+    The endpoint accepts an Authorization header (Bearer token) which will be
+    forwarded to the agent initialization if present.
+    """
+    try:
+        # Build headers dict from request (preserve Authorization if provided)
+        headers = {}
+        raw_auth = request.headers.get('authorization') or request.headers.get('Authorization')
+        if raw_auth:
+            # Normalize common issues seen in incoming Authorization header values:
+            # - surrounding single or double quotes
+            # - URL-encoded or whitespace artifacts
+            # - ensure scheme 'Bearer ' is present
+            auth = raw_auth.strip()
+            # strip surrounding quotes if present
+            if (auth.startswith('"') and auth.endswith('"')) or (auth.startswith("'") and auth.endswith("'")):
+                auth = auth[1:-1].strip()
+
+            # Some clients may send Authorization without scheme, only token — add 'Bearer '
+            if not auth.lower().startswith('bearer '):
+                # If it looks like 'Token <token>' or just raw token, try to extract token part
+                parts = auth.split()
+                if len(parts) == 1:
+                    token = parts[0]
+                else:
+                    # take last part as token
+                    token = parts[-1]
+                auth = f'Bearer {token}'
+
+            headers['Authorization'] = auth
+
+        question = payload.question
+        result = run_agent(question, headers=headers)
+    except ValueError as ve:
+        # missing token or config issues
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"result": result}
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
