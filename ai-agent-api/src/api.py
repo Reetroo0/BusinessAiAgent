@@ -1,7 +1,9 @@
 from fastapi import FastAPI, Request, HTTPException, Body
 from pydantic import BaseModel
-from typing import Dict, Optional
 import uvicorn
+from set_token import set_gigachat_access_token
+from contextlib import asynccontextmanager
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from main import run_agent
 import json
@@ -27,7 +29,20 @@ class CompanyData(BaseModel):
     state_electronic_services: str
     future_implementation_plans: str
 
-app = FastAPI()
+# Планировщик для периодического запуска функции
+scheduler = AsyncIOScheduler()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    scheduler.start()
+    scheduler.add_job(set_gigachat_access_token, 'interval', minutes=1)
+    set_gigachat_access_token()
+    try:
+        yield
+    finally:
+        scheduler.shutdown()
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/digitalMaturity")
@@ -113,6 +128,7 @@ async def ask(request: Request, payload: QuestionPayload = Body(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"result": result}
+
 
 
 if __name__ == "__main__":
