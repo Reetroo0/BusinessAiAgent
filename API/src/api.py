@@ -35,7 +35,7 @@ scheduler = AsyncIOScheduler()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler.start()
-    scheduler.add_job(set_gigachat_access_token, 'interval', minutes=1)
+    scheduler.add_job(set_gigachat_access_token, 'interval', minutes=20)
     set_gigachat_access_token()
     try:
         yield
@@ -52,28 +52,34 @@ async def digital_maturity(data: CompanyData = Body(...)):
     Note: FastAPI allows body on GET when explicitly declared, but some clients/proxies
     may not support bodies for GET — consider POST if that is an issue.
     """
-    company_dict = data.dict()
+    company_dict = data.model_dump()
+
     # Save company data to src/data.json so tools in models.py can load it on demand
     src_dir = Path(__file__).parent
     data_path = src_dir / 'data.json'
-    try:
-        with data_path.open('w', encoding='utf-8') as f:
-            json.dump(company_dict, f, ensure_ascii=False, indent=2)
+    
+    with data_path.open('w', encoding='utf-8') as f:
+        json.dump(company_dict, f, ensure_ascii=False, indent=2)
 
-        question = "Оцени уровень цифровой зрелости компании"
-        # Load token from .env (if present) and build headers
-        load_dotenv(find_dotenv())
-        token = os.getenv("GIGACHAT_ACCESS_TOKEN")
+    question = "Оцени уровень цифровой зрелости компании"
+    # Load token from .env (if present) and build headers
+    load_dotenv(find_dotenv())
+    token = os.getenv("GIGACHAT_ACCESS_TOKEN")
+    
+    try:
+
         headers = None
         if token:
             headers = {
                 "Authorization": f"Bearer {token}",
                 "Content-Type": "application/json",
             }
+            #print(headers)
 
         # Do not pass company_data to run_agent; tools will read data.json
         result = run_agent(question, headers=headers)
     except Exception as e:
+        #print(f"Error in /digitalMaturity: {e}")
         # Log exception server-side if needed, return 500 to client
         raise HTTPException(status_code=500, detail=str(e))
 

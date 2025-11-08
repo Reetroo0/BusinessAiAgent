@@ -1,0 +1,17 @@
+{
+  "formalization_level": "mostly_yes",
+  "automation_systems": "mostly_yes",
+  "kpi_metrics": "mostly_yes",
+  "data_driven_decisions": "mostly_yes",
+  "it_systems_used": "mostly_yes",
+  "systems_integration": "mostly_yes",
+  "cloud_services_usage": "yes",
+  "info_security_measures": "mostly_no",
+  "digital_literacy": "no",
+  "training_programs": "yes",
+  "it_specialists_in_house": "yes",
+  "employees_automation_perception": "yes",
+  "it_strategy": "yes",
+  "state_electronic_services": "yes",
+  "future_implementation_plans": "mostly_yes"
+}
